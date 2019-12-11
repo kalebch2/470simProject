@@ -1,6 +1,7 @@
+-- This function determines where on the board the user clicks
+--  and then it sets the desired play signal
 function onMouseEvent(ui,id,type,flags,x,y)
     local evt=(type==simUI.mouse.left_button_down and 'down' or 'up')
-    
     
     if x >= 145 and x <= 195 and y >= 140 and y <= 190 then 
         sim.setIntegerSignal('play',1)
@@ -31,7 +32,7 @@ function onMouseEvent(ui,id,type,flags,x,y)
         play = 9
     end
     
-    turn = sim.getIntegerSignal('turn')
+    turn = sim.getIntegerSignal('turn') -- Get whose turn it is to determine who played the piece
     
     if turn == 0 then 
         simUI.setLabelText(ui,1000,'Orange clicked location '..play)
@@ -41,6 +42,7 @@ function onMouseEvent(ui,id,type,flags,x,y)
     
 end
 
+-- UI setup
 function sysCall_init()
     xml = [[
     <ui closeable="true" on-close="closeEventHandler" resizable="true">
@@ -53,7 +55,6 @@ function sysCall_init()
         <image id="5007"
             on-mouse-up="onMouseEvent"
              />/>
-        
     </ui>
     ]]
     ui=simUI.create(xml)
@@ -66,18 +67,21 @@ function sysCall_init()
 end
 
 function sysCall_actuation()
+    -- Toggles radio buttons to display turn status
     if turn == 0 then 
         simUI.setRadiobuttonValue(ui,1001,1)
     elseif turn == 1 then
         simUI.setRadiobuttonValue(ui,1002,1)
     end
     
+    -- Display end-game message
     if index == 9 then
         simUI.setLabelText(ui,1000,'Game over! U R gr3at!')
     end
 end
 
 function sysCall_sensing()
+    -- Gets and create the UI image
     s=sim.getObjectHandle("sens")
     img,x,y=sim.getVisionSensorCharImage(s)
     simUI.setImageData(ui,5007,img,x,y)

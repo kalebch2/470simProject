@@ -1,3 +1,5 @@
+-- Function for main game loop to call
+-- Commands 'UR3' to play a specified piece and where to play it
 userPlayPiece = function(piece, place)
     sim.setIntegerSignal('UR3_piece', piece)
     sim.setIntegerSignal('UR3_place', place)
@@ -5,6 +7,7 @@ userPlayPiece = function(piece, place)
     sim.setIntegerSignal('UR3_instruction', 0)
 end
 
+-- Same as userPlayPiece() but for 'UR3#0'
 botPlayPiece = function(piece, place)
     sim.setIntegerSignal('UR3_piece#0', piece)
     sim.setIntegerSignal('UR3_place#0', place)
@@ -12,6 +15,8 @@ botPlayPiece = function(piece, place)
     sim.setIntegerSignal('UR3_instruction#0', 0)
 end
 
+-- Returns TRUE if the desired play is valid (aka if the space is unoccupied)
+-- Returns FALSE if the space is taken already
 validPlay=function(board,play)
     if play == 1 and board[1][1] == 0 then
         return true
@@ -36,7 +41,7 @@ validPlay=function(board,play)
     end
 end
 
-
+-- Updates the programs stored board state after every turn
 updateBoard=function(board,play,turn)
     if turn == 0 and play == 1 then
         board[1][1] = 1
@@ -79,9 +84,10 @@ end
 
 
 function sysCall_threadmain()
-    sim.setIntegerSignal('turn',0)
-    sim.setIntegerSignal('index',0)
-    sim.setIntegerSignal('play',0)
+    -- Inter-object signals
+    sim.setIntegerSignal('turn',0) -- Current turn No.
+    sim.setIntegerSignal('index',0) -- Total No. of pieces played
+    sim.setIntegerSignal('play',0) -- Current play from the UI
     
     turn = sim.getIntegerSignal('turn')
     index = sim.getIntegerSignal('index')
@@ -89,6 +95,7 @@ function sysCall_threadmain()
     userPieceCount = 5
     botPieceCount = 5
     
+    -- Board initialization
     board = {}
     for i=1,3 do
         board[i] = {}     
@@ -97,10 +104,11 @@ function sysCall_threadmain()
         end
     end
     
-    while sim.getSimulationState()~=sim.simulation_advancing_abouttostop do
-    
-        while index ~= 9 do
-            if turn == 0 then
+
+    while sim.getSimulationState()~=sim.simulation_advancing_abouttostop do -- "While sim is running"
+        -- Main game control loop
+        while index ~= 9 do -- while 9 game piece have not been played
+            if turn == 0 then -- User's turn (UR3)
                 play = sim.getIntegerSignal('play')
                 
                 valid = validPlay(board,play)
@@ -109,8 +117,8 @@ function sysCall_threadmain()
                     valid = validPlay(board,play)
                 end
                 
-                userPlayPiece(userPieceCount, play)
-                sim.wait(8)
+                userPlayPiece(userPieceCount, play) -- Instruct UR3 to play a piece
+                sim.wait(8)                         -- NECESSARY sim wait time
                 
                 userPieceCount = userPieceCount - 1
                 index = index + 1
@@ -127,7 +135,7 @@ function sysCall_threadmain()
                     valid = validPlay(board,play)
                 end
                 
-                botPlayPiece(botPieceCount, play)
+                botPlayPiece(botPieceCount, play) -- Instruct UR3#0 to play a piece
                 sim.wait(8)
                 
                 botPieceCount = botPieceCount - 1

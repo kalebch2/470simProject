@@ -7,6 +7,7 @@ playPiece=function(pickupPos, dropPos)
     sim.wait(1.0)
     sim.rmlMoveToPosition(target,UR3,-1,nil,nil,v,a,a,{pickupPos[1],pickupPos[2],pickupPos[3]+0.2},nil,v)
     
+    -- Play piece
     sim.rmlMoveToPosition(target,UR3,-1,nil,nil,v,a,a,{dropPos[1],dropPos[2],dropPos[3]+0.2},nil,v)
     sim.wait(0.5)
     sim.rmlMoveToPosition(target,UR3,-1,nil,nil,v,a,a,dropPos,nil,v)
@@ -14,9 +15,12 @@ playPiece=function(pickupPos, dropPos)
     sim.wait(1.0)
     sim.rmlMoveToPosition(target,UR3,-1,nil,nil,v,a,a,{dropPos[1],dropPos[2],dropPos[3]+0.2},nil,v)
     
+    -- Return home
     sim.rmlMoveToPosition(target,UR3,-1,nil,nil,v,a,a,home,nil,v)
 end
 
+-- Function to set the suction on and off.
+--  Mainly for aesthetics to clean up suction on/off call
 setSuction=function(data)
     if data==1 then
         sim.setIntegerSignal('suctionPad_active',1)
@@ -25,9 +29,8 @@ setSuction=function(data)
     end
 end
 
---shakeHands=function()
-
---end
+-- shakeHands=function()
+-- end
 
 function sysCall_threadmain()
     UR3 = sim.getObjectHandle('UR3')
@@ -37,9 +40,11 @@ function sysCall_threadmain()
     ikTask1 = sim.getIkGroupHandle('UR3_undamped')
     ikTask2 = sim.getIkGroupHandle('UR3_damped')
     
+    -- Locations with reference to the robot's base frame
+    -- Home location
     home = {-0.1263, -0.1124, 0.1495}
     
-    -- Game Pieces
+    -- Game Piece Locations
     one = {-0.4483,	-0.2210, -0.0450}
     two = {-0.3908,	-0.2960, -0.0450}
     three = {-0.3333, -0.2210, -0.0450}
@@ -56,6 +61,7 @@ function sysCall_threadmain()
     G = {-0.4483, -0.1150, -0.0450}
     H = {-0.3333, -0.1150, -0.0450}
     I = {-0.2183, -0.1150, -0.0450}
+
     -- Linear (Velocity and Acceleration)
     v = {0.25,0.25,0.25,0.25}
     a = {10,10,10,10}
