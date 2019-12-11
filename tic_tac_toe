@@ -1,0 +1,144 @@
+userPlayPiece = function(piece, place)
+    sim.setIntegerSignal('UR3_piece', piece)
+    sim.setIntegerSignal('UR3_place', place)
+    sim.setIntegerSignal('UR3_instruction', 1)
+    sim.setIntegerSignal('UR3_instruction', 0)
+end
+
+botPlayPiece = function(piece, place)
+    sim.setIntegerSignal('UR3_piece#0', piece)
+    sim.setIntegerSignal('UR3_place#0', place)
+    sim.setIntegerSignal('UR3_instruction#0', 1)
+    sim.setIntegerSignal('UR3_instruction#0', 0)
+end
+
+validPlay=function(board,play)
+    if play == 1 and board[1][1] == 0 then
+        return true
+    elseif play == 2 and board[1][2] == 0 then
+        return true
+    elseif play == 3 and board[1][3] == 0 then
+        return true
+    elseif play == 4 and board[2][1] == 0 then
+        return true
+    elseif play == 5 and board[2][2] == 0 then
+        return true
+    elseif play == 6 and board[2][3] == 0 then
+        return true
+    elseif play == 7 and board[3][1] == 0 then
+        return true
+    elseif play == 8 and board[3][2] == 0 then
+        return true
+    elseif play == 9 and board[3][3] == 0 then
+        return true
+    else
+        return false
+    end
+end
+
+
+updateBoard=function(board,play,turn)
+    if turn == 0 and play == 1 then
+        board[1][1] = 1
+    elseif turn == 0 and play == 2 then 
+        board[1][2] = 1
+    elseif turn == 0 and play == 3 then 
+        board[1][3] = 1
+    elseif turn == 0 and play == 4 then 
+        board[2][1] = 1
+    elseif turn == 0 and play == 5 then 
+        board[2][2] = 1
+    elseif turn == 0 and play == 6 then 
+        board[2][3] = 1
+    elseif turn == 0 and play == 7 then 
+        board[3][1] = 1
+    elseif turn == 0 and play == 8 then 
+        board[3][2] = 1
+    elseif turn == 0 and play == 9 then 
+        board[3][3] = 1
+    elseif turn == 1 and play == 1 then 
+        board[1][1] = 2
+    elseif turn == 1 and play == 2 then 
+        board[1][2] = 2
+    elseif turn == 1 and play == 3 then 
+        board[1][3] = 2
+    elseif turn == 1 and play == 4 then 
+        board[2][1] = 2
+    elseif turn == 1 and play == 5 then 
+        board[2][2] = 2
+    elseif turn == 1 and play == 6 then 
+        board[2][3] = 2
+    elseif turn == 1 and play == 7 then 
+        board[3][1] = 2
+    elseif turn == 1 and play == 8 then 
+        board[3][2] = 2
+    elseif turn == 1 and play == 9 then 
+        board[3][3] = 2
+    end
+end
+
+
+function sysCall_threadmain()
+    sim.setIntegerSignal('turn',0)
+    sim.setIntegerSignal('index',0)
+    sim.setIntegerSignal('play',0)
+    
+    turn = sim.getIntegerSignal('turn')
+    index = sim.getIntegerSignal('index')
+    
+    userPieceCount = 5
+    botPieceCount = 5
+    
+    board = {}
+    for i=1,3 do
+        board[i] = {}     
+        for j=1,3 do
+            board[i][j] = 0
+        end
+    end
+    
+    while sim.getSimulationState()~=sim.simulation_advancing_abouttostop do
+    
+        while index ~= 9 do
+            if turn == 0 then
+                play = sim.getIntegerSignal('play')
+                
+                valid = validPlay(board,play)
+                while valid ~= true do
+                    play = sim.getIntegerSignal('play')
+                    valid = validPlay(board,play)
+                end
+                
+                userPlayPiece(userPieceCount, play)
+                sim.wait(8)
+                
+                userPieceCount = userPieceCount - 1
+                index = index + 1
+                turn = 1
+                sim.setIntegerSignal('turn',1)
+                sim.setIntegerSignal('play',0)
+                sim.setIntegerSignal('index',index)
+            elseif turn == 1 then 
+                play = sim.getIntegerSignal('play')
+                
+                valid = validPlay(board,play)
+                while valid ~= true do
+                    play = sim.getIntegerSignal('play')
+                    valid = validPlay(board,play)
+                end
+                
+                botPlayPiece(botPieceCount, play)
+                sim.wait(8)
+                
+                botPieceCount = botPieceCount - 1
+                index = index + 1
+                turn = 0
+                sim.setIntegerSignal('turn',0)
+                sim.setIntegerSignal('play',0)
+                sim.setIntegerSignal('index',index)
+            end
+        end
+        sim.wait(5.0)
+        sim.stopSimulation()
+    end
+end
